@@ -3,10 +3,12 @@
 
 ### Installation
 
-  ```python pip install requirements.txt
+  ```
+  python pip install requirements.txt
   ```
 
 ### Run
 
-  ```streamlit run app.py
+  ```
+  streamlit run app.py
   ```
