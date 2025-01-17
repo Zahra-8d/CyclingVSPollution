@@ -1,6 +1,6 @@
 import streamlit
 import pydeck
-from utils import load_data, create_layer, createBikeLaneLayer
+from utils import createBikeLaneLayer
 
 # Page header
 
@@ -9,7 +9,7 @@ streamlit.title("Comparative study of Cycling Infrastructure and Pollution level
 streamlit.markdown("---")
 
 
-# get data and build layers and views
+# get data from database and build layers and views
 green_colour = [3,125,80]
 red_colour = [255, 0, 0]
 zoom = 11

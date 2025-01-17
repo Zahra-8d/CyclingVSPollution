@@ -132,3 +132,5 @@ def getCentroid(city: Literal['Berlin', 'London']) -> tuple[float, float]:
         raise NoResultFound(f'Could not fetch centroid of {city}')
 
     return tuple(to_shape(data[0]).coords)[0]
+
+

@@ -25,7 +25,7 @@ def createBikeLaneLayer(city: Literal['Berlin', 'London'],
     """
     
     data = BikeLaneDBtoPandas(city=city)
-    Clng, Clat = getCentroid(city=city)
+    lng, lat = getCentroid(city=city)
 
     layer = pydeck.Layer(
             type='PathLayer',
@@ -39,4 +39,4 @@ def createBikeLaneLayer(city: Literal['Berlin', 'London'],
             get_width=10
     )
     
-    return layer, Clat, Clng
+    return layer, lat, lng
