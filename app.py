@@ -1,6 +1,6 @@
 import streamlit
 import pydeck
-from utils import load_data, create_layer
+from utils import load_data, create_layer, createBikeLaneLayer
 
 # Page header
 
@@ -10,26 +10,23 @@ streamlit.markdown("---")
 
 
 # get data and build layers and views
-
-london_cyclepath_data = load_data("data/CycleRoutesLondon.geojson")
-berlin_cyclepath_data = load_data("data/CycleRoutesBerlin.geojson")
 green_colour = [3,125,80]
 red_colour = [255, 0, 0]
 zoom = 11
 
+london_layer, lat_london, lng_london = createBikeLaneLayer(city='London', color_rgb=green_colour)
+berlin_layer, lat_berlin, lng_berlin = createBikeLaneLayer(city='Berlin', color_rgb=green_colour)
 
-london_layer = create_layer(london_cyclepath_data, green_colour) 
-berlin_layer = create_layer(berlin_cyclepath_data, green_colour)
 
 london_view_state = pydeck.ViewState(
-    latitude=london_cyclepath_data.geometry.centroid.y.mean(),
-    longitude=london_cyclepath_data.geometry.centroid.x.mean(),
+    latitude=lat_london,
+    longitude=lng_london,
     zoom=zoom
 )
 
 berlin_view_state = pydeck.ViewState(
-    latitude=float(berlin_cyclepath_data.geometry.centroid.y.mean()),
-    longitude=float(berlin_cyclepath_data.geometry.centroid.x.mean()),
+    latitude=lat_berlin,
+    longitude=lng_berlin,
     zoom=zoom
 )
 
