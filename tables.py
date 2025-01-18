@@ -9,7 +9,7 @@ City = Table(
     metadata,
     Column('ID', INTEGER, Identity(always=True), primary_key=True),
     Column('Name', TEXT, nullable=False)
-)
+) 
 
 BikeLane = Table(
     'BikeLane',

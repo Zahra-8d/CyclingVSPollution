@@ -1,6 +1,6 @@
 from json import load
 from typing import Literal
-from sqlalchemy import select, insert, Insert, Select
+from sqlalchemy import select, insert, Insert, Select, func
 from sqlalchemy.exc import NoResultFound
 from shapely import LineString, MultiLineString
 from shapely.ops import transform
@@ -132,5 +132,25 @@ def getCentroid(city: Literal['Berlin', 'London']) -> tuple[float, float]:
         raise NoResultFound(f'Could not fetch centroid of {city}')
 
     return tuple(to_shape(data[0]).coords)[0]
+
+def getTotalBikeLaneLenghts(city: Literal['Berlin','London']) -> float:
+
+    stmt: Select = (select(func.sum(BikeLane.c['Lenght']))
+                    .where(City.c['Name'] == city)
+                    .join(City, BikeLane.c['CityID'] == City.c['ID']))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchone()
+
+    if not data:
+        raise NoResultFound(f'Unable to sum the bike lane lenghts for {city}')
+    
+    return data[0]
+
+def createDB() -> None:
+    createTables()
+    addCityData()
+    BikeLaneGeoJsontoDB('London')
+    BikeLaneGeoJsontoDB('Berlin')
 
 

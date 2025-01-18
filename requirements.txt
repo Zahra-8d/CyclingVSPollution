@@ -3,5 +3,5 @@ geopandas
 pydeck
 sqlalchemy
 geoalchemy2
-pandas
 shapely
+pandas

@@ -12,7 +12,7 @@ streamlit.markdown("---")
 # get data from database and build layers and views
 green_colour = [3,125,80]
 red_colour = [255, 0, 0]
-zoom = 11
+zoom = 8
 
 london_layer, lat_london, lng_london = createBikeLaneLayer(city='London', color_rgb=green_colour)
 berlin_layer, lat_berlin, lng_berlin = createBikeLaneLayer(city='Berlin', color_rgb=green_colour)

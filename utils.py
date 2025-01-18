@@ -21,7 +21,7 @@ def create_layer(data, color):
 def createBikeLaneLayer(city: Literal['Berlin', 'London'],
                         color_rgb: list[int] = [3,125,80]) -> tuple[pydeck.Layer, float, float]:
     """
-    Return the pydeck.Layer and the mean Lat and Lng for the chosen city
+    Return the pydeck.Layer and the mean Lat and Lng for the chosen city.
     """
     
     data = BikeLaneDBtoPandas(city=city)
@@ -38,5 +38,5 @@ def createBikeLaneLayer(city: Literal['Berlin', 'London'],
             get_path = 'Geom', 
             get_width=10
     )
-    
+
     return layer, lat, lng
