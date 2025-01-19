@@ -1,0 +1,6 @@
+Station;174 Frankfurter Allee;174 Frankfurter Allee;174 Frankfurter Allee;174 Frankfurter Allee;174 Frankfurter Allee;174 Frankfurter Allee;174 Frankfurter Allee
+Messkomponente;Feinstaub (PM10);Feinstaub (PM2,5);Stickstoffdioxid;Stickstoffmonoxid;Stickoxide;Ozon;Kohlenmonoxid
+Einheit;µg/m³;µg/m³;µg/m³;µg/m³;µg/m³;µg/m³;mg/m³
+Messzeit (Angaben in MESZ bzw. MEZ);Jahreswerte;Jahreswerte;Jahreswerte;Jahreswerte;Jahreswerte;Jahreswerte;Jahreswerte
+
+2023;19;12;24;11;41;47;0.3

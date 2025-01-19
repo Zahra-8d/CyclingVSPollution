@@ -1,0 +1,16 @@
+id,station_name,NO2 Average concentration (µg/m³),address,latitude,longitude
+221,Karl-Marx-Straße,10,"12043 Berlin, Karl-Marx-Str. 38",52.4837517,13.4296765
+117,Schildhornstraße,9,"12163 Berlin, Schildhornstr. 76",52.4635838,13.3182612
+042,Neukölln,3,"12047 Berlin, Nansenstr. 10",52.4892354,13.430926958396096
+282,Karlshorst,3,"10318 Berlin, Johanna-und-Willy-Brauer-Platz",52.48538255,13.52950241078641
+027,Marienfelde,2,"12307 Berlin, Schichauweg 60",52.3961667,13.3687865
+032,Grunewald,2,"14193 Berlin, Jagen 91",52.49260945,13.24816588845885
+190,Leipziger Straße,16,"10117 Berlin, Leipziger Straße 5",52.51012794984174,13.386221108590162
+124,Mariendorfer Damm,19,"12099 Berlin, Mariendorfer Damm 148",52.4379694,13.3875696
+010,Wedding,4,"13353 Wedding, Amrumer Str. 1.",52.544992699999995,13.345580049999999
+077,Buch,2,"13125 Berlin, Hobrechtsfelder Chaussee 110",52.6444137,13.48274609170041
+144,Silbersteinstraße,19,"12051 Berlin, Silbersteinstr. 5",52.4674246,13.4411624
+171,Mitte,3,"10179 Berlin, Brückenstr. 6",52.5135789,13.418481
+145,Frohnau,2,"13465 Berlin, Jägerstieg 1",52.65234558477255,13.296715808373492
+085,Friedrichshagen,2,"12587 Berlin, Müggelseedamm 307",52.4467585313493,13.626781235747359
+174,Frankfurter Allee,11,"10247 Berlin, Frankfurter Allee 86b",52.513939,13.4701178
