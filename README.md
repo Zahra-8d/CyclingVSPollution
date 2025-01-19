@@ -16,7 +16,8 @@
 ### Create Database
 
   ```
-  1. Create a database in your local PostgreSQL Server with PgAdmin4 and install postgis and postgis_raster extensions in the database.
+  1. Create a database in your local PostgreSQL Server with PgAdmin4
+     and install postgis and postgis_raster extensions in the database.
 
   2. edit the engine create function in engine.py as such: 
   
