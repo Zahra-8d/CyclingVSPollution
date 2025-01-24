@@ -101,7 +101,7 @@ def BikeLaneDBtoPandas(city: Literal['Berlin', 'London'],
                        columns: list[str] = ['Geom', 'Lenght']) -> DataFrame:
 
     #DATA FETCH------------------------------------------------
-    stmt: Select = (select(BikeLane.c[*columns])
+    stmt: Select = (select(*[BikeLane.c[col] for col in columns])
                     .where(City.c['Name'] == city)
                     .join(City, BikeLane.c['CityID'] == City.c['ID'])
                     )
