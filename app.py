@@ -22,7 +22,6 @@ berlin_size = 891700000 #metres squared
 london_layer, lat_london, lng_london = createBikeLaneLayer(city='London', color_rgb=green_colour)
 berlin_layer, lat_berlin, lng_berlin = createBikeLaneLayer(city='Berlin', color_rgb=green_colour)
 
-
 london_view_state = pydeck.ViewState(
     latitude=lat_london,
     longitude=lng_london,
@@ -106,4 +105,4 @@ streamlit.text(" ")
 # Page Footer
 
 streamlit.markdown("---")
-streamlit.text("A project by Zahra Ali, Yuna and Mark")
+streamlit.text("A project by Zahra Ali, Mark Grmek, Kyung Yun Choi")
