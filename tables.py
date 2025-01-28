@@ -8,7 +8,9 @@ City = Table(
     'City',
     metadata,
     Column('ID', INTEGER, Identity(always=True), primary_key=True),
-    Column('Name', TEXT, nullable=False)
+    Column('Name', TEXT, nullable=False),
+    Column('Population', INTEGER, nullable=False),
+    Column('Area', INTEGER, nullable=False, comment='km2')
 ) 
 
 BikeLane = Table(
@@ -17,17 +19,16 @@ BikeLane = Table(
     Column('ID', INTEGER, Identity(always=True), primary_key=True),
     Column('CityID', INTEGER, ForeignKey('City.ID'), index=True),
     Column('Geom', Geometry('GEOMETRY'), nullable=False),
-    Column('Lenght', FLOAT, nullable=False)
+    Column('Lenght', FLOAT, nullable=False, comment='m')
 )
 
-#TODO - create pollution table - data needed to know what columns to create
+Pollution = Table(
+    'Pollution',
+    metadata,
+    Column('ID', INTEGER, Identity(always=True), primary_key=True),
+    Column('CityID', INTEGER, ForeignKey('City.ID'), index=True),
+    Column('Name', TEXT, nullable=True),
+    Column('Geom', Geometry('GEOMETRY'), nullable=False),
+    Column('NO2', FLOAT, nullable=True, comment='µg/m3')
+)
 
-# Pollution = Table(
-#     'Pollution',
-#     metadata,
-#     Column('ID', INTEGER, Identity(always=True), primary_key=True),
-#     Column('CItyID', INTEGER, ForeignKey('City.ID'), index=True),
-#     Column('Coordinates', ARRAY(FLOAT, dimensions=2), nullable=False),
-#     Column('Level', FLOAT, nullable=False)
-# )
-#

@@ -2,16 +2,17 @@ from json import load
 from typing import Literal
 from sqlalchemy import select, insert, Insert, Select, func
 from sqlalchemy.exc import NoResultFound
-from shapely import LineString, MultiLineString
+from shapely import LineString, MultiLineString, Point, get_coordinates
+from shapely.geometry import shape
 from shapely.ops import transform
-from shapely import get_coordinates
 from geoalchemy2.shape import from_shape, to_shape
 from geoalchemy2.functions import ST_Centroid
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 
 from engine import engine
-from tables import metadata, City, BikeLane
+from tables import metadata, City, BikeLane, Pollution
 
+#GENERAL==========================================================================================
 def createTables() -> None:
     metadata.create_all(engine)
     print('All tables sucesfully created')
@@ -20,24 +21,45 @@ def dropTables() -> None:
     metadata.drop_all(engine)
     print('All tables sucesfully dropped')
 
-def addCityData() -> None:
+def createDB() -> None:
+    createTables()
+
+    for city in ('London', 'Berlin'):
+        addCity(city)
+        addBikeLane(city)
+        addPollution(city)
+
+def remove_z(x,y,z=None):
+    return tuple(filter(None, [x, y]))
+
+def to_coords(geometry) -> list[list]:
+    return get_coordinates(geometry).tolist()
+
+#CITIES============================================================================================
+def addCity(city: Literal['London','Berlin']) -> None:
+    if city == 'London':
+        data = {'Name': city,
+                'Area': 1572,
+                'Population': 8866000}
     
-    data: list[dict] = [{'Name': 'Berlin'},
-                        {'Name': 'London'}]
+    elif city == 'Berlin':
+        data = {'Name': city,
+                'Area': 891,
+                'Population': 3432000}
     
-    stmt: Insert = insert(City)
+    
+    stmt: Insert = City.insert()
 
     with engine.connect() as conn:
         conn.execute(stmt, data)
         conn.commit()
 
-    print('City data succesfully added to the database')
+    print(f'{city} succesfully added to the database')
 
 def getCityID(city: Literal['London','Berlin']) -> int:
 
     stmt: Select = (select(City.c['ID'])
-                    .where(City.c['Name'] == city)
-                    )
+                    .where(City.c['Name'] == city))
     
     with engine.connect() as conn:
         data = conn.execute(stmt).fetchone()
@@ -48,10 +70,48 @@ def getCityID(city: Literal['London','Berlin']) -> int:
     print(f'City ID = {data[0]} for {city}')
     return data[0]
 
-def _removeZ(x,y,z=None):
-    return tuple(filter(None, [x, y]))
+def getCityZoomPoint(city: Literal['Berlin', 'London']) -> tuple[float, float]:
 
-def BikeLaneGeoJsontoDB(city: Literal['London','Berlin']) -> None:
+    stmt: Select = (select(ST_Centroid(BikeLane.c['Geom']))
+                    .where(City.c['Name'] == city)
+                    .join(City, BikeLane.c['CityID']==City.c['ID']))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchone()
+
+    if not data:
+        raise NoResultFound(f'Could not fetch centroid of {city}')
+
+    return tuple(to_shape(data[0]).coords)[0]
+
+def getCityArea(city: Literal['Berlin', 'London']) -> float:
+
+    stmt: Select = (select(City.c['Area'])
+                    .where(City.c['Name'] == city))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchone()
+
+    if not data:
+        raise NoResultFound(f'Could not fetch area for {city}')
+    
+    return data[0]
+
+def getCityPopulation(city: Literal['Berlin', 'London']) -> float:
+
+    stmt: Select = (select(City.c['Population'])
+                    .where(City.c['Name'] == city))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchone()
+
+    if not data:
+        raise NoResultFound(f'Could not fetch population for {city}')
+    
+    return data[0]
+
+#BIKE LANES======================================================================================
+def addBikeLane(city: Literal['London','Berlin']) -> None:
     
     #DATA PREP----------------------------------------
     city_id = getCityID(city)
@@ -76,7 +136,7 @@ def BikeLaneGeoJsontoDB(city: Literal['London','Berlin']) -> None:
                 geometry = MultiLineString(geometry)
             
             #remove Z coordinate if exists
-            geometry = transform(_removeZ, geometry)
+            geometry = transform(remove_z, geometry)
   
             #convert from shapely to PostGIS type
             geometry = from_shape(geometry) 
@@ -94,17 +154,12 @@ def BikeLaneGeoJsontoDB(city: Literal['London','Berlin']) -> None:
 
     print(f'Bike lanes for {city} succesfully added to the database')
 
-def to_coords(geometry: LineString|MultiLineString) -> list[list]:
-    return get_coordinates(geometry).tolist()
-
-def BikeLaneDBtoPandas(city: Literal['Berlin', 'London'],
-                       columns: list[str] = ['Geom', 'Lenght']) -> DataFrame:
+def getBikeLaneDF(city: Literal['Berlin', 'London']) -> DataFrame:
 
     #DATA FETCH------------------------------------------------
-    stmt: Select = (select(*[BikeLane.c[col] for col in columns])
+    stmt: Select = (select(BikeLane.c['Geom','Lenght'])
                     .where(City.c['Name'] == city)
-                    .join(City, BikeLane.c['CityID'] == City.c['ID'])
-                    )
+                    .join(City, BikeLane.c['CityID'] == City.c['ID']))
     
     with engine.connect() as conn:
         data = conn.execute(stmt).fetchall()
@@ -113,27 +168,13 @@ def BikeLaneDBtoPandas(city: Literal['Berlin', 'London'],
         raise NoResultFound(f'Could not find any bike lane data for {city}')
     
     #DATA PREP------------------------------------------------
-    data = DataFrame(data=data, columns=columns)
+    data = DataFrame(data=data, columns=['Geom','Lenght'])
     data['Geom'] = data['Geom'].apply(to_shape) #convert geometry back to shapely
     data['Geom'] = data['Geom'].apply(to_coords)
 
     return data
 
-def getCentroid(city: Literal['Berlin', 'London']) -> tuple[float, float]:
-
-    stmt: Select = (select(ST_Centroid(BikeLane.c['Geom']))
-                    .where(City.c['Name'] == city)
-                    .join(City, BikeLane.c['CityID']==City.c['ID']))
-    
-    with engine.connect() as conn:
-        data = conn.execute(stmt).fetchone()
-
-    if not data:
-        raise NoResultFound(f'Could not fetch centroid of {city}')
-
-    return tuple(to_shape(data[0]).coords)[0]
-
-def getTotalBikeLaneLenghts(city: Literal['Berlin','London']) -> float:
+def getBikeLaneLenght_SUM(city: Literal['Berlin','London']) -> float:
 
     stmt: Select = (select(func.sum(BikeLane.c['Lenght']))
                     .where(City.c['Name'] == city)
@@ -147,10 +188,111 @@ def getTotalBikeLaneLenghts(city: Literal['Berlin','London']) -> float:
     
     return data[0]
 
-def createDB() -> None:
-    createTables()
-    addCityData()
-    BikeLaneGeoJsontoDB('London')
-    BikeLaneGeoJsontoDB('Berlin')
+def getBikeLaneLenght_perKM2(city: Literal['Berlin','London']) -> float:
+    return getBikeLaneLenght_SUM(city)/getCityArea(city)
 
+def getBikeLaneLenght_perPER(city: Literal['Berlin','London']) -> float:
+    return getBikeLaneLenght_SUM(city)/getCityPopulation(city)
 
+#POLUTION========================================================================================
+def addPollution(city: Literal['Berlin', 'London']) -> None:
+
+    #DATA PREP----------------------------------------------------
+    city_id = getCityID(city)
+    data: list[dict] = []
+
+        #CASE BERLIN
+    if city == 'Berlin':
+        with open('data/berlin_bezirksgrenzen.geojson') as file:
+            json_data: dict = load(file)
+            pollution_data: DataFrame = read_csv('data/berlin_NO2_per_station.csv')
+
+            for feature in json_data['features']:
+                name = feature['properties']['Gemeinde_name']
+                geometry = shape(feature['geometry'])
+                pollution_level = None
+                           
+                for row_idx, row in pollution_data.iterrows():
+                    if geometry.contains(Point(row['longitude'],row['latitude'])):
+                        pollution_level = row['NO2 Average concentration ']
+                
+                geometry = from_shape(geometry)#convert to PostGIS type
+                data.append({'CityID': city_id,
+                            'Name': name,
+                            'Geom': geometry,
+                            'NO2': pollution_level})
+        #CASE LONDON
+    elif city == 'London':
+        with open('data/london_NO2_borough.geojson') as file:
+            json_data: dict = load(file)
+
+            for feature in json_data['features']:
+                name = feature['properties']['borough_name']
+                pollution_level = feature['properties']['Average concentration roadside*']
+                geometry = shape(feature['geometry'])
+                geometry = from_shape(geometry)#convert to PostGIS type
+
+                data.append({'CityID': city_id,
+                            'Name': name,
+                            'Geom': geometry,
+                            'NO2': pollution_level})
+        
+    #DATA WRITE------------------------------------------------------
+    stmt: Insert = Pollution.insert()
+
+    with engine.connect() as conn:
+        conn.execute(stmt, data)
+        conn.commit()
+
+    print(f'Pollution data for {city} sucesfully added to the database.')
+
+def getPollutionDF(city: Literal['Berlin', 'London']) -> DataFrame:
+
+    #DATA FETCH------------------------------------------------
+    stmt: Select = (select(Pollution.c['Name','Geom','NO2'])
+                    .where(City.c['Name'] == city)
+                    .join(City, Pollution.c['CityID'] == City.c['ID']))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchall()
+    
+    if not data: 
+        raise NoResultFound(f'Could not find any bike lane data for {city}')
+    
+    #DATA PREP------------------------------------------------
+    data = DataFrame(data=data, columns=['Name','Geom','NO2'])
+    data['Geom'] = data['Geom'].apply(to_shape) #convert geometry back to shapely
+    data['Geom'] = data['Geom'].apply(to_coords)
+    
+    fill_color = []
+    for idx, row in data.iterrows():
+        if row['NO2'] < 25:
+            fill_color.append([32,178,170])
+        elif row['NO2'] > 25:
+            fill_color.append([255, 0, 0])
+        else:
+            fill_color.append([128, 128, 128])
+    data['fill_color'] = fill_color
+
+    return data
+
+def getPollutionSUM(city: Literal['Berlin', 'London']) -> float:
+
+    stmt: Select = (select(func.sum(Pollution.c['NO2']))
+                    .where(City.c['Name'] == city)
+                    .join(City, Pollution.c['CityID'] == City.c['ID']))
+    
+    with engine.connect() as conn:
+        data = conn.execute(stmt).fetchone()
+
+    if not data:
+        raise NoResultFound(f'Could not fetch total pollution for {city}')
+    
+    return data[0]
+
+def getPollutionAVG(city: Literal['Berlin', 'London']) -> float:
+    return getPollutionSUM(city)/getCityArea(city)
+
+if __name__ == '__main__':
+    dropTables()
+    createDB()

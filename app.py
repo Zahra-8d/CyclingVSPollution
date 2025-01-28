@@ -1,7 +1,7 @@
 import streamlit
 import pydeck
-from utils import createBikeLaneLayer
-from db_utils import getTotalBikeLaneLenghts
+from utils import createAllLayers
+from db_utils import getBikeLaneLenght_perKM2, getBikeLaneLenght_perPER, getBikeLaneLenght_SUM, getCityArea, getCityPopulation
 
 # Page header
 
@@ -14,13 +14,9 @@ streamlit.markdown("---")
 green_colour = [3,125,80]
 red_colour = [255, 0, 0]
 zoom = 8
-london_population = 8866000
-berlin_population = 3432000
-london_size = 1572000000 #metres squared
-berlin_size = 891700000 #metres squared
 
-london_layer, lat_london, lng_london = createBikeLaneLayer(city='London', color_rgb=green_colour)
-berlin_layer, lat_berlin, lng_berlin = createBikeLaneLayer(city='Berlin', color_rgb=green_colour)
+london_layers, lat_london, lng_london = createAllLayers(city='London')
+berlin_layers, lat_berlin, lng_berlin = createAllLayers(city='Berlin')
 
 london_view_state = pydeck.ViewState(
     latitude=lat_london,
@@ -39,24 +35,21 @@ berlin_view_state = pydeck.ViewState(
 col1, col2 = streamlit.columns(2)
 
 with col1:
-    streamlit.header("London")
+    streamlit.header('London')
     streamlit.pydeck_chart(
         pydeck.Deck(
             map_style="mapbox://styles/mapbox/light-v10",
             initial_view_state = london_view_state,
-            layers=[london_layer],
-            tooltip={"text": "{name}"}, 
+            layers=london_layers,
+            tooltip={"html": "<b>District:</b> {Name} <br /><b>NO2:</b> {NO2} µg/m3"}, 
         )
     )
-    bike_lane_length = getTotalBikeLaneLenghts('London')
-    proportion_by_area = bike_lane_length / london_size
-    proportion_by_pop = bike_lane_length / london_population
 
-    streamlit.subheader(f"Cycle lanes per square meter: {proportion_by_area:,.4f}")
-    streamlit.subheader(f"Cycle lanes per person: {proportion_by_pop:,.4f}")
-    streamlit.text(f"Total cycle lane length: {bike_lane_length:,.2f} metres")
-    streamlit.text(f"Total city area: {london_size:,.2f} m²")
-    streamlit.text(f"Total city population: {london_population:,.2f}")
+    streamlit.subheader(f"Cycle lanes per area: {getBikeLaneLenght_perKM2('London'):,.4f} m/km²")
+    streamlit.subheader(f"Cycle lanes per person: {getBikeLaneLenght_perPER('London'):,.4f} m/person")
+    streamlit.text(f"Total cycle lane length: {getBikeLaneLenght_SUM('London'):,.2f} m")
+    streamlit.text(f"Total city area: {getCityArea('London'):,.2f} km²")
+    streamlit.text(f"Total city population: {getCityPopulation('London'):,.2f} inh.")
 
 with col2:
     streamlit.header("Berlin")
@@ -64,20 +57,16 @@ with col2:
         pydeck.Deck(
             map_style="mapbox://styles/mapbox/light-v10",
             initial_view_state=berlin_view_state,
-            layers=[berlin_layer],
-            tooltip={"text": "{name}"}, 
+            layers=berlin_layers,
+            tooltip={"html": "<b>District:</b> {Name} <br /><b>NO2:</b> {NO2} µg/m3"}, 
         )
     )
 
-    bike_lane_length = getTotalBikeLaneLenghts('Berlin')
-    proportion_by_area = bike_lane_length / berlin_size
-    proportion_by_pop = bike_lane_length / berlin_population
-
-    streamlit.subheader(f"Cycle lanes per square meter: {proportion_by_area:,.4f}")
-    streamlit.subheader(f"Cycle lanes per person: {proportion_by_pop:,.4f}")
-    streamlit.text(f"Total cycle lane length: {bike_lane_length:,.2f} metres")
-    streamlit.text(f"Total city area: {berlin_size:,.2f} m²")
-    streamlit.text(f"Total city population: {berlin_population:,.2f}")
+    streamlit.subheader(f"Cycle lanes per area: {getBikeLaneLenght_perKM2('Berlin'):,.4f} m/km²")
+    streamlit.subheader(f"Cycle lanes per person: {getBikeLaneLenght_perPER('Berlin'):,.4f} m/person")
+    streamlit.text(f"Total cycle lane length: {getBikeLaneLenght_SUM('Berlin'):,.2f} m")
+    streamlit.text(f"Total city area: {getCityArea('Berlin'):,.2f} km²")
+    streamlit.text(f"Total city population: {getCityPopulation('Berlin'):,.2f} inh.")
 
 streamlit.text(" ")
 streamlit.text(" ")
