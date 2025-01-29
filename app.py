@@ -7,7 +7,6 @@ from db_utils import getBikeLaneLenght_perKM2, getBikeLaneLenght_perPER, getBike
 
 streamlit.set_page_config(page_title="Cycling VS Pollution", layout="wide", page_icon="🚲")
 streamlit.title("Comparative study of Cycling Infrastructure and Pollution levels in Berlin and London")
-streamlit.markdown("---")
 
 # get data from database and build layers and views
 green_colour = [3,125,80]
