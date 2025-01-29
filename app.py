@@ -9,10 +9,11 @@ streamlit.set_page_config(page_title="Cycling VS Pollution", layout="wide", page
 streamlit.title("Comparative study of Cycling Infrastructure and Pollution levels in Berlin and London")
 streamlit.markdown("---")
 
-
 # get data from database and build layers and views
 green_colour = [3,125,80]
-red_colour = [255, 0, 0]
+low_pollution_colour = [32,178,170]
+high_pollution_colour = [255, 0, 0]
+no_pollution_data_available = [128, 128, 128]
 zoom = 8
 
 london_layers, lat_london, lng_london = createAllLayers(city='London')
@@ -70,18 +71,27 @@ with col2:
 
 streamlit.text(" ")
 streamlit.text(" ")
+
 # Legend html
 
 legend_html = f"""
-<div style="background-color: black; padding: 20px; border-radius: 5px; border: 1px solid #ccc; width: 260px;">
+<div style="background-color: black; padding: 20px; border-radius: 5px; border: 1px solid #ccc; width: 400px;">
     <h4 style="margin-top: 0;padding: 0; margin-bottom: 7px">Legend</h4>
     <div>
         <span style="display: inline-block; width: 20px; height: 20px; border-bottom: 2px solid rgb({green_colour[0]}, {green_colour[1]}, {green_colour[2]}); margin-right: 10px;"></span>
         <span>Cycling path</span>
     </div>
     <div>
-        <span style="display: inline-block; width: 20px; height: 20px; border-bottom: 15px solid rgb({red_colour[0]}, {red_colour[1]}, {red_colour[2]}); margin-right: 10px;"></span>
-        <span>Pollution hotspot</span>
+        <span style="display: inline-block; width: 20px; height: 20px; opacity: 0.6; border-bottom: 15px solid rgb({high_pollution_colour[0]}, {high_pollution_colour[1]}, {high_pollution_colour[2]}); margin-right: 10px;"></span>
+        <span>High Pollution (More than 25 µg/m³)</span>
+    </div>
+    <div>
+        <span style="display: inline-block; width: 20px; height: 20px; opacity: 0.6; border-bottom: 15px solid rgb({low_pollution_colour[0]}, {low_pollution_colour[1]}, {low_pollution_colour[2]}); margin-right: 10px;"></span>
+        <span>Low Pollution (Less than 25 µg/m³)</span>
+    </div>
+    <div>
+        <span style="display: inline-block; width: 20px; height: 20px; opacity: 0.6; border-bottom: 15px solid rgb({no_pollution_data_available[0]}, {no_pollution_data_available[1]}, {no_pollution_data_available[2]}); margin-right: 10px;"></span>
+        <span>Pollution data unavailable</span>
     </div>
 </div>
 """
